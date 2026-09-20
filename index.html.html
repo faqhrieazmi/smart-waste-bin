@@ -3,132 +3,575 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Waste Bin Dashboard</title>
+<title>Smart Waste Bin - NextGen IoT Dashboard</title>
+<!-- Google Fonts & Font Awesome Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7f6;color:#17201d}
-header{background:#123c32;color:white;padding:22px 6%;display:flex;justify-content:space-between;align-items:center;gap:20px}
-.brand{display:flex;align-items:center;gap:14px}
-.logo{width:48px;height:48px;border-radius:14px;background:#fff;color:#123c32;display:grid;place-items:center;font-size:25px}
-h1{font-size:22px;margin:0 0 4px}.sub{opacity:.75;font-size:13px}
-.live{font-size:13px;background:rgba(255,255,255,.12);padding:9px 13px;border-radius:20px}
-main{max-width:1200px;margin:30px auto;padding:0 20px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.card{background:white;border-radius:18px;padding:20px;box-shadow:0 5px 20px rgba(0,0,0,.06)}
-.label{font-size:13px;color:#718078;margin-bottom:9px}.value{font-size:28px;font-weight:700}
-.status{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
-.dot{width:14px;height:14px;border-radius:50%;background:#27ae60}
-.dot.full{background:#e74c3c}.dot.warning{background:#f39c12}
-.section{margin-top:20px}
-.big{min-height:240px}
-.progress{height:18px;background:#e8eeeb;border-radius:20px;overflow:hidden;margin:14px 0}
-.bar{height:100%;width:35%;background:#27ae60;border-radius:20px;transition:.4s}
-.row{display:flex;justify-content:space-between;align-items:center;gap:20px}
-.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;background:#123c32;color:white}
-.btn.alt{background:#e8eeeb;color:#123c32}
-.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
-table{width:100%;border-collapse:collapse}
-th,td{text-align:left;padding:13px;border-bottom:1px solid #edf1ef;font-size:13px}
-th{color:#718078}
-.badge{padding:6px 10px;border-radius:20px;font-size:12px;font-weight:700}
-.normal{background:#e8f7ee;color:#168044}.full{background:#fdeceb;color:#c0392b}
-footer{text-align:center;color:#7b8782;padding:30px;font-size:12px}
-@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
+:root {
+  --bg-dark: #090d16;
+  --panel-bg: rgba(18, 26, 43, 0.75);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --primary-green: #10b981;
+  --primary-green-glow: rgba(16, 185, 129, 0.35);
+  --danger-red: #ef4444;
+  --danger-red-glow: rgba(239, 68, 68, 0.35);
+  --warning-amber: #f59e0b;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --accent-blue: #3b82f6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg-dark);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* --- Header --- */
+header {
+  background: rgba(13, 19, 32, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 18px 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand { display: flex; align-items: center; gap: 16px; }
+
+.logo-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 0 20px var(--primary-green-glow);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: #fff;
+}
+
+h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.sub { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+
+.header-status { display: flex; align-items: center; gap: 20px; }
+.sys-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--primary-green);
+  padding: 8px 16px;
+  border-radius: 30px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--primary-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--primary-green);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* --- Main Layout --- */
+main { max-width: 1280px; margin: 32px auto; padding: 0 24px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 22px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover { border-color: rgba(255, 255, 255, 0.18); transform: translateY(-2px); }
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+.card-icon { font-size: 16px; color: var(--text-muted); }
+
+.value { font-size: 30px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.status-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--primary-green); box-shadow: 0 0 12px var(--primary-green); }
+.status-dot.full { background: var(--danger-red); box-shadow: 0 0 12px var(--danger-red); }
+
+/* --- Section Layout --- */
+.dashboard-middle {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.main-monitor { display: flex; flex-direction: column; justify-content: space-between; }
+
+.level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 15px;
+}
+
+.time-stamp { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+
+/* Progress Bar --- */
+.progress-container {
+  height: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 30px;
+  padding: 3px;
+  border: 1px solid var(--panel-border);
+  margin: 16px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  width: 35%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 30px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.6s ease;
+  box-shadow: 0 0 15px var(--primary-green-glow);
+}
+
+.bar.full {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  box-shadow: 0 0 15px var(--danger-red-glow);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--panel-border);
+}
+
+.message { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+
+.hardware-led {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--primary-green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.hardware-led.full {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger-red);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Control Buttons */
+.controls { display: flex; gap: 12px; margin-top: 20px; }
+
+.btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); }
+
+.btn-reset {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  border: 1px solid var(--panel-border);
+}
+
+.btn-reset:hover { background: rgba(255, 255, 255, 0.12); transform: translateY(-2px); }
+
+/* --- Chart Container --- */
+.chart-container { height: 180px; width: 100%; margin-top: 10px; }
+
+/* --- Table Styles --- */
+.table-section { margin-top: 20px; }
+.table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+
+table { width: 100%; border-collapse: collapse; }
+
+th {
+  text-align: left;
+  padding: 14px 18px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+td {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+tbody tr { transition: background 0.2s ease; }
+tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.badge-normal { background: rgba(16, 185, 129, 0.15); color: var(--primary-green); border: 1px solid rgba(16, 185, 129, 0.2); }
+.badge-full { background: rgba(239, 68, 68, 0.15); color: var(--danger-red); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+/* Footer */
+footer {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 30px 0 0 0;
+  font-size: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 40px;
+}
+
+/* Responsive UI */
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-middle { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+  header { flex-direction: column; align-items: flex-start; gap: 15px; }
+  .header-status { width: 100%; justify-content: space-between; }
+}
 </style>
 </head>
 <body>
+
 <header>
   <div class="brand">
-    <div class="logo">♻</div>
-    <div><h1>Smart Waste Bin</h1><div class="sub">IoT Monitoring Dashboard • ESP32 + Infrared Sensor</div></div>
+    <div class="logo-box"><i class="fa-solid fa-recycle"></i></div>
+    <div>
+      <h1>Smart Waste Bin</h1>
+      <div class="sub">NextGen IoT Monitoring System • ESP32 Node</div>
+    </div>
   </div>
-  <div class="live">● System Online</div>
+  <div class="header-status">
+    <div class="sys-badge"><span class="pulse-dot"></span> ESP32 ONLINE</div>
+    <div style="font-size:14px; color:var(--text-muted);"><i class="fa-solid fa-wifi"></i> 98%</div>
+  </div>
 </header>
 
 <main>
+  <!-- TOP METRIC CARDS -->
   <div class="grid">
     <div class="card">
-      <div class="label">BIN STATUS</div>
-      <div class="status"><span id="dot" class="dot"></span><span id="status">NORMAL</span></div>
-    </div>
-    <div class="card">
-      <div class="label">IR SENSOR</div>
-      <div class="value" id="sensor">NOT DETECTED</div>
-    </div>
-    <div class="card">
-      <div class="label">FILL THRESHOLD</div>
-      <div class="value" id="fill">35%</div>
-    </div>
-    <div class="card">
-      <div class="label">ALERT</div>
-      <div class="value" id="alert">OFF</div>
-    </div>
-  </div>
-
-  <div class="section card big">
-    <div class="row">
-      <div>
-        <div class="label">WASTE LEVEL / THRESHOLD</div>
-        <div class="value" id="levelText">35%</div>
+      <div class="card-top">
+        <span class="label">Bin Status</span>
+        <i class="fa-solid fa-dumpster card-icon"></i>
       </div>
-      <div id="time">Last update: --:--:--</div>
+      <div class="status-badge">
+        <span id="dot" class="status-dot"></span>
+        <span id="status">NORMAL</span>
+      </div>
     </div>
-    <div class="progress"><div class="bar" id="bar"></div></div>
-    <div class="row">
-      <span id="message">Waste bin is operating normally.</span>
-      <span id="led">🟢 Green LED</span>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="label">IR Sensor</span>
+        <i class="fa-solid fa-microchip card-icon"></i>
+      </div>
+      <div class="value" id="sensor" style="font-size:20px; font-weight:700;">CLEAR</div>
     </div>
-    <div class="buttons">
-      <button class="btn" onclick="simulateFull()">Simulate FULL</button>
-      <button class="btn alt" onclick="simulateNormal()">Reset NORMAL</button>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="label">Fill Threshold</span>
+        <i class="fa-solid fa-chart-simple card-icon"></i>
+      </div>
+      <div class="value" id="fill" style="color:var(--primary-green);">35%</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="label">Alarm / Siren</span>
+        <i class="fa-solid fa-bell card-icon"></i>
+      </div>
+      <div class="value" id="alert" style="color:var(--text-muted);">OFF</div>
     </div>
   </div>
 
-  <div class="section card">
-    <div class="row"><h2 style="margin:0;font-size:18px">Recent Activity</h2><span class="label">Live simulation</span></div>
+  <!-- MIDDLE MONITOR & REAL-TIME CHART -->
+  <div class="dashboard-middle">
+    <!-- Main Indicator Box -->
+    <div class="card main-monitor">
+      <div>
+        <div class="level-header">
+          <div>
+            <div class="label">Capacity Level</div>
+            <div class="value" id="levelText" style="font-size:42px; margin-top:4px;">35%</div>
+          </div>
+          <div class="time-stamp" id="time"><i class="fa-regular fa-clock"></i> Last update: --:--:--</div>
+        </div>
+
+        <div class="progress-container">
+          <div class="bar" id="bar"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="message" id="message">
+            <i class="fa-solid fa-circle-check" style="color:var(--primary-green)"></i> Bin status optimal. System active.
+          </div>
+          <div class="hardware-led" id="led">
+            <i class="fa-solid fa-lightbulb"></i> Green LED
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-danger" onclick="simulateFull()">
+          <i class="fa-solid fa-triangle-exclamation"></i> Simulate FULL
+        </button>
+        <button class="btn btn-reset" onclick="simulateNormal()">
+          <i class="fa-solid fa-rotate-left"></i> Reset NORMAL
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Chart Panel -->
+    <div class="card">
+      <div class="card-top">
+        <span class="label">Real-Time Level Trend</span>
+        <i class="fa-solid fa-chart-line card-icon"></i>
+      </div>
+      <div class="chart-container">
+        <canvas id="wasteChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY LOG TABLE -->
+  <div class="card table-section">
+    <div class="table-header">
+      <h2 style="font-size: 16px; font-weight:700;"><i class="fa-solid fa-list-check" style="margin-right:8px; color:var(--accent-blue);"></i> Recent Sensor Logs</h2>
+      <span class="label" style="background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:12px;">Live Telemetry</span>
+    </div>
     <table>
-      <thead><tr><th>Time</th><th>IR Sensor</th><th>Status</th><th>Alert</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>IR Sensor</th>
+          <th>Status</th>
+          <th>Alarm Status</th>
+        </tr>
+      </thead>
       <tbody id="history">
-        <tr><td>--:--:--</td><td>NOT DETECTED</td><td><span class="badge normal">NORMAL</span></td><td>OFF</td></tr>
+        <!-- JS rows will append here -->
       </tbody>
     </table>
   </div>
 </main>
 
-<footer>Smart Waste Bin Monitoring System • Prototype Dashboard</footer>
+<footer>
+  Smart Waste Bin Monitoring System • NextGen ESP32 Architecture • IoT Dashboard
+</footer>
 
 <script>
-function now(){
-  return new Date().toLocaleTimeString('en-MY',{hour12:false});
-}
-function updateUI(full){
-  const t=now();
-  const status=full?'FULL':'NORMAL';
-  const detected=full?'DETECTED':'NOT DETECTED';
-  const level=full?90:35;
+// --- Chart.js Setup ---
+const ctx = document.getElementById('wasteChart').getContext('2d');
+const gradientGreen = ctx.createLinearGradient(0, 0, 0, 150);
+gradientGreen.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+gradientGreen.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
-  document.getElementById('status').textContent=status;
-  document.getElementById('sensor').textContent=detected;
-  document.getElementById('fill').textContent=level+'%';
-  document.getElementById('levelText').textContent=level+'%';
-  document.getElementById('alert').textContent=full?'ON':'OFF';
-  document.getElementById('dot').className='dot '+(full?'full':'');
-  document.getElementById('bar').style.width=level+'%';
-  document.getElementById('bar').style.background=full?'#e74c3c':'#27ae60';
-  document.getElementById('message').textContent=full?'⚠ Waste collection required.':'Waste bin is operating normally.';
-  document.getElementById('led').textContent=full?'🔴 Red LED + Buzzer':'🟢 Green LED';
-  document.getElementById('time').textContent='Last update: '+t;
+const wasteChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [{
+      label: 'Fill Level (%)',
+      data: [],
+      borderColor: '#10b981',
+      borderWidth: 2,
+      fill: true,
+      backgroundColor: gradientGreen,
+      tension: 0.4,
+      pointRadius: 3,
+      pointBackgroundColor: '#10b981'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 10 } } },
+      y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+    }
+  }
+});
 
-  const row=document.createElement('tr');
-  row.innerHTML=`<td>${t}</td><td>${detected}</td><td><span class="badge ${full?'full':'normal'}">${status}</span></td><td>${full?'ON':'OFF'}</td>`;
-  const h=document.getElementById('history');
-  h.prepend(row);
-  while(h.children.length>6) h.removeChild(h.lastChild);
+function getTimestamp() {
+  return new Date().toLocaleTimeString('en-MY', { hour12: false });
 }
-function simulateFull(){updateUI(true)}
-function simulateNormal(){updateUI(false)}
+
+function addChartData(time, level, isFull) {
+  if (wasteChart.data.labels.length > 7) {
+    wasteChart.data.labels.shift();
+    wasteChart.data.datasets[0].data.shift();
+  }
+  wasteChart.data.labels.push(time);
+  wasteChart.data.datasets[0].data.push(level);
+  
+  // Dynamic color change on chart
+  const color = isFull ? '#ef4444' : '#10b981';
+  wasteChart.data.datasets[0].borderColor = color;
+  wasteChart.data.datasets[0].pointBackgroundColor = color;
+  
+  wasteChart.update();
+}
+
+function updateUI(full) {
+  const time = getTimestamp();
+  const status = full ? 'FULL' : 'NORMAL';
+  const detected = full ? 'BLOCKED' : 'CLEAR';
+  const level = full ? 95 : 35;
+
+  // Update Status Text & Indicators
+  document.getElementById('status').textContent = status;
+  document.getElementById('sensor').textContent = detected;
+  
+  const fillEl = document.getElementById('fill');
+  fillEl.textContent = level + '%';
+  fillEl.style.color = full ? 'var(--danger-red)' : 'var(--primary-green)';
+
+  document.getElementById('levelText').textContent = level + '%';
+  
+  const alertEl = document.getElementById('alert');
+  alertEl.textContent = full ? 'ACTIVE' : 'OFF';
+  alertEl.style.color = full ? 'var(--danger-red)' : 'var(--text-muted)';
+
+  // Dot & Bar Adjustments
+  const dot = document.getElementById('dot');
+  dot.className = 'status-dot ' + (full ? 'full' : '');
+
+  const bar = document.getElementById('bar');
+  bar.style.width = level + '%';
+  if (full) {
+    bar.classList.add('full');
+  } else {
+    bar.classList.remove('full');
+  }
+
+  // Info message & LED state
+  const messageEl = document.getElementById('message');
+  const ledEl = document.getElementById('led');
+
+  if (full) {
+    messageEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--danger-red)"></i> Warning: Bin threshold reached. Immediate pickup required!`;
+    ledEl.innerHTML = `<i class="fa-solid fa-lightbulb"></i> Red LED + Buzzer`;
+    ledEl.className = 'hardware-led full';
+  } else {
+    messageEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--primary-green)"></i> Waste bin is operating normally.`;
+    ledEl.innerHTML = `<i class="fa-solid fa-lightbulb"></i> Green LED`;
+    ledEl.className = 'hardware-led';
+  }
+
+  document.getElementById('time').innerHTML = `<i class="fa-regular fa-clock"></i> Last update: ${time}`;
+
+  // Real-time Chart Update
+  addChartData(time, level, full);
+
+  // Table Log Update
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${time}</td>
+    <td><span style="color:${full ? 'var(--danger-red)' : 'var(--primary-green)'}">${detected}</span></td>
+    <td><span class="badge ${full ? 'badge-full' : 'badge-normal'}">${status}</span></td>
+    <td>${full ? '<span style="color:var(--danger-red); font-weight:700;">TRIGGERED</span>' : 'STANDBY'}</td>
+  `;
+
+  const history = document.getElementById('history');
+  history.prepend(row);
+  while (history.children.length > 6) {
+    history.removeChild(history.lastChild);
+  }
+}
+
+function simulateFull() { updateUI(true); }
+function simulateNormal() { updateUI(false); }
+
+// Initialize Default UI
 updateUI(false);
 </script>
+
 </body>
 </html>
