@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Waste Bin Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7f6;color:#17201d}
+header{background:#123c32;color:white;padding:22px 6%;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:48px;height:48px;border-radius:14px;background:#fff;color:#123c32;display:grid;place-items:center;font-size:25px}
+h1{font-size:22px;margin:0 0 4px}.sub{opacity:.75;font-size:13px}
+.live{font-size:13px;background:rgba(255,255,255,.12);padding:9px 13px;border-radius:20px}
+main{max-width:1200px;margin:30px auto;padding:0 20px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:white;border-radius:18px;padding:20px;box-shadow:0 5px 20px rgba(0,0,0,.06)}
+.label{font-size:13px;color:#718078;margin-bottom:9px}.value{font-size:28px;font-weight:700}
+.status{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
+.dot{width:14px;height:14px;border-radius:50%;background:#27ae60}
+.dot.full{background:#e74c3c}.dot.warning{background:#f39c12}
+.section{margin-top:20px}
+.big{min-height:240px}
+.progress{height:18px;background:#e8eeeb;border-radius:20px;overflow:hidden;margin:14px 0}
+.bar{height:100%;width:35%;background:#27ae60;border-radius:20px;transition:.4s}
+.row{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;background:#123c32;color:white}
+.btn.alt{background:#e8eeeb;color:#123c32}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:13px;border-bottom:1px solid #edf1ef;font-size:13px}
+th{color:#718078}
+.badge{padding:6px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.normal{background:#e8f7ee;color:#168044}.full{background:#fdeceb;color:#c0392b}
+footer{text-align:center;color:#7b8782;padding:30px;font-size:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">♻</div>
+    <div><h1>Smart Waste Bin</h1><div class="sub">IoT Monitoring Dashboard • ESP32 + Infrared Sensor</div></div>
+  </div>
+  <div class="live">● System Online</div>
+</header>
+
+<main>
+  <div class="grid">
+    <div class="card">
+      <div class="label">BIN STATUS</div>
+      <div class="status"><span id="dot" class="dot"></span><span id="status">NORMAL</span></div>
+    </div>
+    <div class="card">
+      <div class="label">IR SENSOR</div>
+      <div class="value" id="sensor">NOT DETECTED</div>
+    </div>
+    <div class="card">
+      <div class="label">FILL THRESHOLD</div>
+      <div class="value" id="fill">35%</div>
+    </div>
+    <div class="card">
+      <div class="label">ALERT</div>
+      <div class="value" id="alert">OFF</div>
+    </div>
+  </div>
+
+  <div class="section card big">
+    <div class="row">
+      <div>
+        <div class="label">WASTE LEVEL / THRESHOLD</div>
+        <div class="value" id="levelText">35%</div>
+      </div>
+      <div id="time">Last update: --:--:--</div>
+    </div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="row">
+      <span id="message">Waste bin is operating normally.</span>
+      <span id="led">🟢 Green LED</span>
+    </div>
+    <div class="buttons">
+      <button class="btn" onclick="simulateFull()">Simulate FULL</button>
+      <button class="btn alt" onclick="simulateNormal()">Reset NORMAL</button>
+    </div>
+  </div>
+
+  <div class="section card">
+    <div class="row"><h2 style="margin:0;font-size:18px">Recent Activity</h2><span class="label">Live simulation</span></div>
+    <table>
+      <thead><tr><th>Time</th><th>IR Sensor</th><th>Status</th><th>Alert</th></tr></thead>
+      <tbody id="history">
+        <tr><td>--:--:--</td><td>NOT DETECTED</td><td><span class="badge normal">NORMAL</span></td><td>OFF</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer>Smart Waste Bin Monitoring System • Prototype Dashboard</footer>
+
+<script>
+function now(){
+  return new Date().toLocaleTimeString('en-MY',{hour12:false});
+}
+function updateUI(full){
+  const t=now();
+  const status=full?'FULL':'NORMAL';
+  const detected=full?'DETECTED':'NOT DETECTED';
+  const level=full?90:35;
+
+  document.getElementById('status').textContent=status;
+  document.getElementById('sensor').textContent=detected;
+  document.getElementById('fill').textContent=level+'%';
+  document.getElementById('levelText').textContent=level+'%';
+  document.getElementById('alert').textContent=full?'ON':'OFF';
+  document.getElementById('dot').className='dot '+(full?'full':'');
+  document.getElementById('bar').style.width=level+'%';
+  document.getElementById('bar').style.background=full?'#e74c3c':'#27ae60';
+  document.getElementById('message').textContent=full?'⚠ Waste collection required.':'Waste bin is operating normally.';
+  document.getElementById('led').textContent=full?'🔴 Red LED + Buzzer':'🟢 Green LED';
+  document.getElementById('time').textContent='Last update: '+t;
+
+  const row=document.createElement('tr');
+  row.innerHTML=`<td>${t}</td><td>${detected}</td><td><span class="badge ${full?'full':'normal'}">${status}</span></td><td>${full?'ON':'OFF'}</td>`;
+  const h=document.getElementById('history');
+  h.prepend(row);
+  while(h.children.length>6) h.removeChild(h.lastChild);
+}
+function simulateFull(){updateUI(true)}
+function simulateNormal(){updateUI(false)}
+updateUI(false);
+</script>
+</body>
+</html>
